@@ -10,10 +10,10 @@ class WebSocketServer:
         self.received_data = None  # Zmienna do przechowywania odebranych danych
 
     async def start(self):
-        # Startujemy serwer WebSocket
-        server = await websockets.serve(self.handler, self.host, self.port)
-        print(f"Serwer WebSocket uruchomiony na {self.host}:{self.port}")
-        await server.wait_closed()
+        # Używamy `async with` dla serwera WebSocket
+        async with websockets.serve(self.handler, self.host, self.port):
+            print(f"Serwer WebSocket uruchomiony na {self.host}:{self.port}")
+            await asyncio.Future()  # Czekaj na zamknięcie serwera
 
     async def handler(self, websocket, path):
         print("Połączono z klientem")
