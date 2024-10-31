@@ -2,37 +2,39 @@ import asyncio
 import websockets
 import json
 
-# Funkcja do odbierania danych od klienta
-async def joystick_handler(websocket, path):
-    print("Połączono z klientem")
+class WebSocketServer:
+    def __init__(self, host="0.0.0.0", port=8765):
+        self.host = host
+        self.port = port
+        self.websocket = None
+        self.received_data = None  # Zmienna do przechowywania odebranych danych
 
-    # Zadanie do odbierania danych od klienta
-    async def receive_data():
+    async def start(self):
+        # Startujemy serwer WebSocket
+        server = await websockets.serve(self.handler, self.host, self.port)
+        print(f"Serwer WebSocket uruchomiony na {self.host}:{self.port}")
+        await server.wait_closed()
+
+    async def handler(self, websocket, path):
+        print("Połączono z klientem")
+        self.websocket = websocket
+
         try:
             async for message in websocket:
-                data = json.loads(message)
-                print(data)
+                self.received_data = json.loads(message)  # Zapisujemy odebrane dane
+                print("Odebrano dane:", self.received_data)
         except websockets.exceptions.ConnectionClosed:
             print("Rozłączono z klientem")
+            self.websocket = None
 
-    # Zadanie do wysyłania danych co 1 sekundę
-    async def send_data():
-        while True:
-            if websocket.open:
-                # Przykładowa ramka danych do wysyłania (na razie same 0)
-                data_to_send = json.dumps({"frame": 0})
-                await websocket.send(data_to_send)
-                print("Wysłano ramkę danych: 0")
-            await asyncio.sleep(1)  # Wysyłanie co 1 sekundę
+    async def wyslij(self, data):
+        if self.websocket and self.websocket.open:
+            data_to_send = json.dumps(data)
+            await self.websocket.send(data_to_send)
+            print("Wysłano dane:", data)
+        else:
+            print("Brak aktywnego połączenia z klientem")
 
-    # Uruchamiamy obie funkcje jednocześnie
-    await asyncio.gather(receive_data(), send_data())
-
-# Uruchomienie serwera WebSocket
-async def main():
-    async with websockets.serve(joystick_handler, "0.0.0.0", 8765):
-        print("Serwer WebSocket uruchomiony")
-        await asyncio.Future()  # Działa bez końca
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    def get_received_data(self):
+        # Zwraca ostatnie odebrane dane
+        return self.received_data
