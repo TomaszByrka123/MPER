@@ -12,15 +12,14 @@ class Arduino:
         self.arduino.reset_input_buffer()
         self.is_running = False
         self.thread = None
-        self.callback = None
+        self.received_data = None 
 
 
     def get_data(self):
         while self.is_running:
             if self.arduino.in_waiting > 0:
                 line = self.arduino.readline().decode().rstrip()
-                if self.callback:
-                    self.callback(line)
+                self.received_data = line
 
 
     def start_get_data(self):
@@ -34,10 +33,6 @@ class Arduino:
         if self.is_running:
             self.is_running = False
             self.thread.join()
-
-
-    def set_callback(self, callback):
-        self.callback = callback
 
 
     def send_data(self, data):

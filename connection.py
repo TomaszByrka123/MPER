@@ -2,7 +2,7 @@ import asyncio
 import websockets
 import json
 
-class WebSocketServer:
+class WebSocket:
     def __init__(self, host="0.0.0.0", port=8765):
         self.host = host
         self.port = port
