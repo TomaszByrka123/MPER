@@ -28,6 +28,7 @@ class WebSocket:
             self.websocket = None
 
     async def wyslij(self, data):
+        print("wysylam")
         if self.websocket and self.websocket.open:
             data_to_send = json.dumps(data)
             await self.websocket.send(data_to_send)

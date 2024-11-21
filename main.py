@@ -16,6 +16,13 @@ do_manipulator = None
 od_manipulator = None
 
 
+async def init_server():
+    global server
+
+    server = WebSocket()
+    await server.start()
+
+
 async def init_camera_pi():
     #plik z kamerą (uruchamianie kamery automatycznie, trzeba usunac jeszze run_camera_mper.service)
     try:
@@ -34,6 +41,8 @@ async def init_arduinos():
     arduino_manipulator.set_callback(on_detction)
     arduino_manipulator .start_get_data()
 
+
+
 async def arduinos_task():
     global arduino_podwozie, arduino_manipulator, do_manipulator, od_manipulator, do_podwozie, od
 
@@ -46,22 +55,21 @@ async def arduinos_task():
     od_manipulator = arduino_manipulator.received_data
 
 async def user_task():
+    print("hello")
     global do_podwozie, od_podwozie, do_manipulator, od_manipulator
     global server, do_user, od_user
 
     od_user = server.get_received_data()
     do_user = [0, 0, 0, 0]
     if od_user is not None:
-        print("Odebrane dane:", od_user)
+        print("gowno")
 
-    
-    
+
+
     await server.wyslij(do_user)
 
 async def main():
-    server = WebSocket()
-    # zadania
-    await server.start()
+    await init_server() # Inicjalizacja servera
     await init_camera_pi()  # Inicjalizacja kamery
     await init_arduinos()  # Inicjalizacja Arduino
 
