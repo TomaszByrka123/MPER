@@ -22,7 +22,6 @@ async def init_server():
     server = WebSocket()
     await server.start()
 
-
 async def init_camera_pi():
     #plik z kamerą (uruchamianie kamery automatycznie, trzeba usunac jeszze run_camera_mper.service)
     try:
@@ -46,7 +45,9 @@ async def init_arduinos():
 async def arduinos_task():
     global arduino_podwozie, arduino_manipulator, do_manipulator, od_manipulator, do_podwozie, od
 
+    print("robie arduino")
     # Wysyłanie danych do Arduino
+    print("wyslano do arduino: ", do_podwozie)
     arduino_podwozie.send_data(do_podwozie)
     arduino_manipulator.send_data(do_manipulator)
 
@@ -62,21 +63,27 @@ async def user_task():
     od_user = server.get_received_data()
     do_user = [0, 0, 0, 0]
     if od_user is not None:
-        print("gowno")
-
-
+        do_podwozie = [od_user[0], od_user[1]]
 
     await server.wyslij(do_user)
 
 async def main():
-    await init_server() # Inicjalizacja servera
+    await init_server()  # Inicjalizacja serwera
+    print("Serwer zainicjalizowany")  # Debug
     await init_camera_pi()  # Inicjalizacja kamery
+    print("Kamera zainicjalizowana")  # Debug
     await init_arduinos()  # Inicjalizacja Arduino
+    print("Arduino zainicjalizowane")  # Debug
 
     while True:
+        print("Pętla główna działa")  # Debug
         await user_task()       # Zadanie obsługujące dane użytkownika
-        await arduinos_task()    # Zadanie obsługujące komunikację z Arduino
+        await arduinos_task()   # Zadanie obsługujące komunikację z Arduino
         await asyncio.sleep(1)  # Czas oczekiwania między iteracjami
 
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Zatrzymano działanie programu.")
